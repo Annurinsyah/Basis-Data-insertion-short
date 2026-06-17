@@ -448,62 +448,62 @@
 
   function parseArr() {
     return document.getElementById('arr-input').value
-      .split(',').map(x => parseInt(x.trim())).filter(n => !isNaN(n));
+      .split(',').map(function(x) { return parseInt(x.trim()); }).filter(function(n) { return !isNaN(n); });
   }
 
   function randomArray() {
     const size = Math.floor(Math.random() * 6) + 5;
-    const a = Array.from({length: size}, () => Math.floor(Math.random() * 90) + 5);
+    const a = Array.from({length: size}, function() { return Math.floor(Math.random() * 90) + 5; });
     document.getElementById('arr-input').value = a.join(', ');
     resetAll();
   }
 
   // ── STEP GENERATION ──
   function generateSteps(input) {
-    const a = [...input];
+    const a = [].concat(input);
     const n = a.length;
     const steps = [];
     const sorted = new Set();
-    sorted.add(0); // index 0 is trivially sorted at start
+    sorted.add(0); 
 
-    steps.push({ arr: [...a], sorted: [...sorted], phase: 'init',
-      log: `Array awal: [${a.join(', ')}] — elemen pertama (indeks 0) sudah dianggap terurut.`,
+    steps.push({ arr: [].concat(a), sorted: Array.from(sorted), phase: 'init',
+      log: 'Array awal: [' + a.join(', ') + '] — elemen pertama (indeks 0) sudah dianggap terurut.',
       pc: 0 });
 
     for (let i = 1; i < n; i++) {
       const key = a[i];
-      steps.push({ arr: [...a], key: i, sorted: [...sorted], phase: 'pick',
-        log: `Pass ${i}: Ambil key = <span class="hl">${key}</span> (indeks ${i}). Akan disisipkan ke posisi yang tepat.`,
+      steps.push({ arr: [].concat(a), key: i, sorted: Array.from(sorted), phase: 'pick',
+        log: 'Pass ' + i + ': Ambil key = <span class="hl">' + key + '</span> (indeks ' + i + '). Akan disisipkan ke posisi yang tepat.',
         pc: [2, 3, 4], pass: i });
 
       let j = i - 1;
       let shifted = false;
       while (j >= 0 && a[j] > key) {
-        steps.push({ arr: [...a], key: i, compare: j, sorted: [...sorted], phase: 'compare',
-          log: `Bandingkan A[${j}] = <span class="hl2">${a[j]}</span> dengan key = <span class="hl">${key}</span>. Karena ${a[j]} > ${key}, geser A[${j}] ke kanan.`,
+        steps.push({ arr: [].concat(a), key: i, compare: j, sorted: Array.from(sorted), phase: 'compare',
+          log: 'Bandingkan A[' + j + '] = <span class="hl2">' + a[j] + '</span> dengan key = <span class="hl">' + key + '</span>. Karena ' + a[j] + ' > ' + key + ', geser A[' + j + '] ke kanan.',
           pc: [5, 6, 7] });
         a[j + 1] = a[j];
         shifted = true;
-        steps.push({ arr: [...a], key: j + 1, shifted: j, sorted: [...sorted], phase: 'shift',
-          log: `Geser <span class="hl2">${a[j+1]}</span> ke posisi ${j + 1}.`,
+        steps.push({ arr: [].concat(a), key: j + 1, shifted: j, sorted: Array.from(sorted), phase: 'shift',
+          log: 'Geser <span class="hl2">' + a[j+1] + '</span> ke posisi ' + (j + 1) + '.',
           pc: 6 });
         j--;
       }
       if (!shifted) {
-        steps.push({ arr: [...a], key: i, compare: j, sorted: [...sorted], phase: 'noshift',
-          log: `A[${j}] = <span class="hl2">${a[j]}</span> ≤ key = <span class="hl">${key}</span>. Tidak perlu geser.`,
+        steps.push({ arr: [].concat(a), key: i, compare: j, sorted: Array.from(sorted), phase: 'noshift',
+          log: 'A[' + j + '] = <span class="hl2">' + a[j] + '</span> ≤ key = <span class="hl">' + key + '</span>. Tidak perlu geser.',
           pc: 5 });
       }
       a[j + 1] = key;
       sorted.add(i);
       for(let k=0; k<=i; k++) sorted.add(k);
-      steps.push({ arr: [...a], inserted: j + 1, sorted: [...sorted], phase: 'insert',
-        log: `Sisipkan key <span class="hl">${key}</span> ke posisi ${j+1}. Subarray [0..${i}] sudah terurut: <span class="hl3">[${a.slice(0,i+1).join(', ')}]</span>`,
+      steps.push({ arr: [].concat(a), inserted: j + 1, sorted: Array.from(sorted), phase: 'insert',
+        log: 'Sisipkan key <span class="hl">' + key + '</span> ke posisi ' + (j+1) + '. Subarray [0..' + i + '] sudah terurut: <span class="hl3">[' + a.slice(0,i+1).join(', ') + ']</span>',
         pc: 9 });
     }
 
-    steps.push({ arr: [...a], sorted: Array.from({length:n},(_,k)=>k), phase: 'done',
-      log: `<span class="hl3">✓ Sorting selesai!</span> Array terurut: <span class="hl3">[${a.join(', ')}]</span>`,
+    steps.push({ arr: [].concat(a), sorted: Array.from({length:n}, function(_,k){return k;}), phase: 'done',
+      log: '<span class="hl3">✓ Sorting selesai!</span> Array terurut: <span class="hl3">[' + a.join(', ') + ']</span>',
       pc: 11 });
 
     return steps;
@@ -513,8 +513,8 @@
   function renderBars(state) {
     const area = document.getElementById('bars-area');
     area.innerHTML = '';
-    const max = Math.max(...state.arr);
-    state.arr.forEach((v, i) => {
+    const max = Math.max.apply(null, state.arr);
+    state.arr.forEach(function(v, i) {
       const wrap = document.createElement('div');
       wrap.className = 'bar-wrap';
 
@@ -524,9 +524,8 @@
 
       const bar = document.createElement('div');
       bar.className = 'bar';
-      bar.style.height = `${Math.max(8, Math.round((v / max) * 180))}px`;
+      bar.style.height = Math.max(8, Math.round((v / max) * 180)) + 'px';
 
-      // color state
       const sorted = new Set(state.sorted || []);
       if (state.phase === 'done' || sorted.has(i)) {
         bar.classList.add('sorted');
@@ -550,10 +549,8 @@
       area.appendChild(wrap);
     });
 
-    // log
     document.getElementById('step-log').innerHTML = state.log || '';
 
-    // stats
     if (state.phase !== 'init') {
       if (['compare','noshift'].includes(state.phase)) cmpCount++;
       if (state.phase === 'shift') shiftCount++;
@@ -562,10 +559,9 @@
     document.getElementById('s-cmp').textContent = cmpCount;
     document.getElementById('s-shf').textContent = shiftCount;
 
-    // pseudocode highlight
-    document.querySelectorAll('#pseudocode .line').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('#pseudocode .line').forEach(function(l) { l.classList.remove('active'); });
     const pcs = Array.isArray(state.pc) ? state.pc : (state.pc !== undefined ? [state.pc] : []);
-    pcs.forEach(n => {
+    pcs.forEach(function(n) {
       const el = document.getElementById('pc' + n);
       if (el) el.classList.add('active');
     });
@@ -589,7 +585,7 @@
   }
 
   function playLoop() {
-    timer = setInterval(() => {
+    timer = setInterval(function() {
       if (stepIdx >= steps.length - 1) {
         clearInterval(timer); playing = false;
         document.getElementById('btn-play').textContent = '▶ Mulai';
@@ -600,6 +596,16 @@
       renderBars(steps[stepIdx]);
     }, getSpeed());
   }
+
+  // Tambahan inisialisasi otomatis saat pertama dimuat
+  window.onload = function() {
+    arr = parseArr();
+    if (arr.length >= 2) {
+      document.getElementById('s-size').textContent = arr.length;
+      steps = generateSteps(arr);
+      renderBars(steps[0]);
+    }
+  };
 
   function pauseSort() {
     clearInterval(timer); playing = false;
@@ -634,19 +640,9 @@
     document.getElementById('s-size').textContent = 0;
     document.getElementById('step-log').innerHTML = 'Masukkan array lalu tekan <strong>Mulai</strong> atau <strong>Langkah</strong>.';
     document.getElementById('btn-play').textContent = '▶ Mulai';
-    document.querySelectorAll('#pseudocode .line').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('#pseudocode .line').forEach(function(l) { l.classList.remove('active'); });
     document.getElementById('bars-area').innerHTML = '';
   }
-
-  // ── INIT ──
-  (function() {
-    arr = parseArr();
-    if (arr.length >= 2) {
-      document.getElementById('s-size').textContent = arr.length;
-      steps = generateSteps(arr);
-      renderBars(steps[0]);
-    }
-  })();
 </script>
 </body>
 </html>
